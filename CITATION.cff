@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this workflow, please cite it using the metadata below."
+title: "Multi-marker eDNA metabarcoding workflow"
+type: software
+authors:
+  - family-names: Rodriguez
+    given-names: Lauren Kelly
+    orcid: "https://orcid.org/0000-0002-9337-6087"
+version: 0.1.0
+date-released: 2026-08-12
+license: MIT
+repository-code: "https://github.com/MarineBio-LKRod/multimarker-edna-metabarcoding"
+
