@@ -1,89 +1,124 @@
 # Multi-marker eDNA metabarcoding workflow
 
-Reproducible R workflow for COI, 16S, and 18S eDNA metabarcoding, including
-BLAST/LCA taxonomic assignment, control-based decontamination, positive-PCR-
-replicate averaging, sampling-event aggregation, multi-marker integration,
-biodiversity analyses, and ecological network inference.
+An adaptable workflow for processing and analyzing multi-marker environmental
+DNA metabarcoding data. The repository documents the sequence-processing and R
+analysis steps used in a study combining COI, 18S rRNA, and vertebrate-targeted
+16S rRNA assays.
 
-## Workflow
+The workflow covers:
 
-1. Demultiplex plate-level reads into tagged PCR replicate/sample combinations
-   with Cutadapt.
-2. Process COI, 16S, and 18S independently with APSCALE.
-3. Retrieve NCBI lineages for deduplicated BLAST accessions with `metabark`.
-4. Retain candidate hits using marker-specific percentage-identity thresholds
-   and resolve them by lowest common ancestor (LCA).
-5. Subtract ESV reads detected in PCR, extraction, and field controls from the
-   corresponding affected PCR replicates.
-6. Average non-zero read counts across positive PCR replicates within each
-   environmental filter.
-7. Collapse ESVs with the same marker-specific taxonomic assignment by summing
-   their reads.
-8. Remove obvious non-environmental labels and retain taxa supported by at
-   least 10 total reads or detection in at least two filters.
-9. Sum paired filters associated with the same ecological sampling event.
-10. Remove the event-specific target whale taxon.
-11. Calculate within-marker event RRA, remove taxa below 1%, and renormalize.
-12. Sum overlapping taxonomic groups across markers and renormalize within each
-    event.
-13. Run richness, paired filter-versus-event, accumulation, rarefaction, NMDS, PERMANOVA,
-    dispersion, LCBD, indicator-taxon, and co-detection network analyses.
+- marker-specific APSCALE processing;
+- BLASTn searches and lowest-common-ancestor taxonomic reconciliation;
+- control-based contaminant subtraction at the PCR-replicate level;
+- PCR-replicate, filter, and sampling-event aggregation;
+- marker-specific relative read abundance filtering;
+- multi-marker presence-absence integration;
+- richness, accumulation, ordination, PERMANOVA, LCBD, indicator-taxon, and
+  co-detection network analyses.
+
+This repository is an analysis companion rather than a one-command software
+package. File paths, metadata values, control scopes, and manually reviewed
+taxonomy must be adapted to each project before use.
+
+## Workflow overview
+
+```text
+paired-end FASTQ files
+        |
+        v
+primer handling and APSCALE processing (COI, 18S, and 16S separately)
+        |
+        v
+ESV occurrence tables and representative sequences
+        |
+        v
+BLASTn searches and NCBI lineage retrieval
+        |
+        v
+candidate-hit filtering and LCA assignment
+        |
+        v
+control subtraction and PCR-replicate aggregation
+        |
+        v
+manual taxonomy review and event-level aggregation
+        |
+        v
+marker-specific filtering and multi-marker matrices
+        |
+        v
+community, sampling-effort, indicator, and network analyses
+```
+
+## Repository structure
+
+```text
+config/      marker thresholds and project-wide settings
+data/        metadata and reviewed-taxonomy templates
+docs/        run order, input schemas, and methodological notes
+hpc/         generic SLURM templates for APSCALE, BLASTn, and COI trimming
+R/           reusable helper functions
+scripts/     ordered R workflow stages
+results/     generated outputs; contents ignored by Git
+workflow_template.R
+```
+
+## Quick start
+
+1. Clone or download the repository.
+2. Create the local input and output directories listed in
+   `config/settings.R`.
+3. Copy and complete the templates in `data/metadata/`.
+4. Adapt the paths and scheduler settings in `hpc/` before running the
+   marker-specific preprocessing jobs.
+5. Copy `workflow_template.R`, populate the input file paths, and run the R
+   scripts in numerical order.
+6. Review LCA assignments and save the accepted tables under
+   `data/reviewed_taxonomy/` before building final ecological matrices.
+
+Detailed instructions are provided in [docs/RUN_ORDER.md](docs/RUN_ORDER.md).
 
 ## Marker-specific identity thresholds
 
 | Marker | Species | Genus | Family | Order |
 |---|---:|---:|---:|---:|
-| COI | ≥97% | 94–96.9% | 90–93.9% | 85–89.9% |
-| 16S | ≥98% | 94–97.9% | 90–93.9% | higher level below 90% |
-| 18S | ≥97% | 92–96.9% | 88–91.9% | 85–87.9% |
+| COI | >=97% | >=94% | >=90% | >=85% |
+| 16S | >=98% | >=94% | >=90% | not assigned by identity threshold |
+| 18S | >=97% | >=92% | >=88% | >=85% |
 
-Thresholds are stored in `config/marker_config.csv` and applied before LCA
-resolution. Candidate hits within 99% of the best bit score are retained by
-default; this value is recorded in `config/settings.R`.
+Candidate hits must also agree taxonomically. A high percentage identity alone
+does not guarantee a species-level assignment. Thresholds are stored in
+`config/marker_config.csv`.
 
-## Repository structure
+## Multi-marker integration
 
-```text
-config/      marker thresholds and global settings
-R/           reusable workflow functions
-scripts/     ordered analysis stages
-data/        metadata templates and reviewed-taxonomy instructions
-results/     generated tables and figures (ignored by Git)
-```
+Read abundance is calculated and filtered independently within each marker.
+Because read proportions are not directly comparable among assays, the default
+cross-marker community matrix is presence-absence. The repository retains a
+separate marker-level RRA table for marker-specific summaries and plots.
 
-## Required R packages
+## Required software
 
-The workflow explicitly uses `metabark`, `vegan`, `indicspecies`, `iNEXT`,
-`adespatial`, `igraph`, `ggraph`, `Hmisc`, `tidyverse`, `readxl`, and
-`openxlsx`. Package availability is checked by `scripts/00_packages.R`.
-Installation is intentionally not performed inside analysis scripts.
+- R 4.3 or later
+- Cutadapt
+- APSCALE
+- BLAST+
+- A local NCBI nucleotide database or another documented reference database
 
-## Metadata
+Required R packages are checked in `scripts/00_packages.R`. The optional online
+NCBI lineage-retrieval step additionally requires `metabark` and an NCBI API
+key stored locally as `NCBI_API_KEY` in `.Renviron`. No credentials are stored
+in this repository.
 
-Use `data/metadata/sample_metadata_template.csv` as the minimum schema. Each PCR
-replicate must map to a filter, PCR plate, extraction batch, field-control
-interval, and ecological event. Controls use `sample_type` values
-`pcr_control`, `extraction_control`, or `field_control`.
+## Reproducibility and data availability
 
-Use `data/metadata/target_taxa_template.csv` to identify the whale taxon removed
-from each event.
+Raw FASTQ files, BLAST databases, large intermediate tables, manually reviewed
+project data, and generated results are intentionally excluded from Git. Public
+data accessions and the associated manuscript can be added when available.
 
-## NCBI API key
+Before creating a release, record package versions with `renv` or save the
+output of `sessionInfo()`.
 
-No API key is included. Store it locally in `.Renviron`:
+## License
 
-```text
-NCBI_API_KEY=your_key_here
-```
-
-`.Renviron` is excluded by `.gitignore`.
-
-## Reproducibility
-
-Run scripts from the repository root in numerical order. Manual taxonomic and
-ecological review tables should be versioned as explicit inputs. Record package
-versions with `renv` or save `sessionInfo()` before release.
-
-Raw FASTQ files, BLAST databases, intermediate files, and generated results are
-excluded from Git. Deposit raw reads and supporting data in appropriate public
-repositories and link those records here.
+Code is released under the [MIT License](LICENSE).

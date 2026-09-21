@@ -1,0 +1,7 @@
+sample_rep_id,filter_id,event_id,marker,sample_type,pcr_plate,extraction_batch,field_interval,event_type,target_taxon
+EVENT001_F1_a_R1,EVENT001_F1,EVENT001,COI,environmental,COI_P01,EXT01,FIELD01,surface,
+EVENT001_F1_b_R1,EVENT001_F1,EVENT001,COI,environmental,COI_P01,EXT01,FIELD01,surface,
+EVENT001_F1_c_R1,EVENT001_F1,EVENT001,COI,environmental,COI_P01,EXT01,FIELD01,surface,
+PCRNEG_COI_P01_a_R1,PCRNEG_COI_P01,PCRNEG_COI_P01,COI,pcr_control,COI_P01,EXT01,FIELD01,control,
+EXTNEG_EXT01_a_R1,EXTNEG_EXT01,EXTNEG_EXT01,COI,extraction_control,COI_P01,EXT01,FIELD01,control,
+FIELDNEG_FIELD01_a_R1,FIELDNEG_FIELD01,FIELDNEG_FIELD01,COI,field_control,COI_P01,EXT01,FIELD01,control,
