@@ -1,24 +1,24 @@
-# Multi-marker eDNA metabarcoding workflow
+# eDNA metabarcoding workflow
 
 An adaptable workflow for processing and analyzing multi-marker environmental
-DNA metabarcoding data. The repository documents the sequence-processing and R
-analysis steps used in a study combining COI, 18S rRNA, and vertebrate-targeted
+DNA metabarcoding data. This repository documents the processing and
+analysis steps used in a study combining COI, 18S rRNA, and
 16S rRNA assays.
 
 The workflow covers:
 
-- marker-specific APSCALE processing;
-- BLASTn searches and lowest-common-ancestor taxonomic reconciliation;
-- control-based contaminant subtraction at the PCR-replicate level;
-- PCR-replicate, filter, and sampling-event aggregation;
-- marker-specific relative read abundance filtering;
-- multi-marker presence-absence integration;
+- marker-specific APSCALE processing
+- BLASTn searches and lowest-common-ancestor taxonomic reconciliation
+- control-based contaminant subtraction at the PCR-replicate level
+- PCR-replicate, filter, and sampling-event aggregation
+- marker-specific relative read abundance filtering
+- multi-marker presence-absence integration
 - richness, accumulation, ordination, PERMANOVA, LCBD, indicator-taxon, and
-  co-detection network analyses.
+  co-detection network analyses
 
 This repository is an analysis companion rather than a one-command software
 package. File paths, metadata values, control scopes, and manually reviewed
-taxonomy must be adapted to each project before use.
+taxonomy must be adapted to each project.
 
 ## Workflow overview
 
@@ -29,7 +29,7 @@ paired-end FASTQ files
 primer handling and APSCALE processing (COI, 18S, and 16S separately)
         |
         v
-ESV occurrence tables and representative sequences
+ESV occurrence tables
         |
         v
 BLASTn searches and NCBI lineage retrieval
@@ -100,7 +100,14 @@ separate marker-level RRA table for marker-specific summaries and plots.
 ## Required software
 
 - R 4.3 or later
-- Cutadapt
+  - metabark
+  - vegan
+  - indicspecies
+  - adespatial
+  - igraph
+  - ggraph
+  - ggplot2
+- cutadapt
 - APSCALE
 - BLAST+
 - A local NCBI nucleotide database or another documented reference database
